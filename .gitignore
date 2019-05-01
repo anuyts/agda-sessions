@@ -1,1 +1,12 @@
+*.aux
+*.pdf
+*.synctex.gz
+*.log
+*.toc
+*.bbl
+*.bst
+*.xyc
+*.out
+*~
+*.blg
 *.agdai
