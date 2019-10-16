@@ -84,21 +84,21 @@ data _×_ (A B : Set) : Set where
   _,_ : A → B → A × B
 
 fst : {A B : Set} → A × B → A
-fst (x , y) = x
+fst (a , b) = a
 
 snd : {A B : Set} → A × B → B
-snd (x , y) = y
+snd (a , b) = b
 
 data _⊎_ (A B : Set) : Set where
   left  : A → A ⊎ B
   right : B → A ⊎ B
 
 ×-comm : {A B : Set} → A × B → B × A
-×-comm (x , y) = y , x
+×-comm (a , b) = b , a
 
 distr : {A B C : Set} → A × (B ⊎ C) → (A × B) ⊎ (A × C)
-distr (x , left b) = left (x , b)
-distr (x , right c) = right (x , c)
+distr (a , left b) = left (a , b)
+distr (a , right c) = right (a , c)
 
 app : {A B : Set} → (A → B) × A → B
 app (f , a) = f a
@@ -149,7 +149,7 @@ test-min-max = refl
 ∧-same true = refl
 ∧-same false = refl
 
-if-same : {A : Set} → (b : Bool) (x : A) → (if b then x else x) ≡ x
+if-same : {A : Set} → (b : Bool) → (x : A) → (if b then x else x) ≡ x
 if-same true x = refl
 if-same false x = refl
 
@@ -171,6 +171,9 @@ cong f {x} {.x} refl = refl
 true-not-false : true ≡ false → ⊥
 true-not-false ()
 
+⊥-elim : {A : Set} → ⊥ → A
+⊥-elim ()
+
 not-zero-and-one : (n : Nat) → n ≡ 0 → n ≡ 1 → ⊥
 not-zero-and-one zero eq0 ()
 not-zero-and-one (suc n) () eq1
@@ -184,6 +187,18 @@ not-zero-and-one'' .1 () refl
 ∨-first : (b : Bool) → b ∨ false ≡ true → b ≡ true
 ∨-first true eq = refl
 ∨-first false () 
+
+easy-match : {x : Nat} → suc x ≡ 3 → x ≡ 2
+easy-match {.2} refl = refl
+
+harder-match : {x : Nat} → x * 4 ≡ 12 → x ≡ 3
+harder-match {zero} ()
+harder-match {suc zero} ()
+harder-match {suc (suc zero)} ()
+harder-match {suc (suc (suc zero))} p = refl
+harder-match {suc (suc (suc (suc x)))} ()
+-- New versions of Agda may allow omission of all clauses but the `refl` one,
+-- so that the match is not that hard after all.
 
 uip : {A : Set} {x y : A} {p q : x ≡ y} → p ≡ q
 uip {A} {x} {.x} {refl} {refl} = refl
@@ -217,8 +232,8 @@ plus-comm (suc m) n = trans (cong suc (plus-comm m n)) (plus-suc-right n m)
 
 
 {-
-Part 7: Lambda-abstractions
-===========================
+Part 7: Lambda-abstractions and functions
+=========================================
 -}
 split-assumption : {A B C : Set} → (A ⊎ B → C) → (A → C) × (B → C)
 split-assumption f = (λ a → f (left a)) , (λ b → f (right b))
@@ -240,6 +255,36 @@ lemma f = (λ { (left a) → f a
              }
           ) , (λ ())
 
+const : {A B : Set} → A → B → A
+const a b = a
+ambiguous-function : Bool → ⊥ → Nat
+ambiguous-function bool bot =
+  const {B = Bool} 5 (if bool then ⊥-elim bot else ⊥-elim bot)
+  
+if-zero : Nat → {A : Set} → A → A → A
+if-zero = λ {zero    {A} a b → a ;
+             (suc n) {A} a b → b}
+
+refl₁ : {A : Set} → {a : A} → a ≡ a 
+refl₁ = refl
+
+refl₂ : {A : Set} {a : A} → a ≡ a 
+refl₂ = refl
+
+refl₃ : (A : Set) → (a : A) → a ≡ a 
+refl₃ A a = refl
+
+refl₄ : (A : Set) (a : A) → a ≡ a 
+refl₄ A a = refl
+
+refl₅ : ∀ {A} (a : A) → a ≡ a
+refl₅ a = refl
+
+refl₆ : ∀ A {a : A} → a ≡ a
+refl₆ A = refl
+
+refl₇ : ∀ A a → a ≡ a
+refl₇ A a = refl {A} -- If we explicitly pass the argument A, Agda figures that `a : A`.
 
 
 
@@ -257,6 +302,10 @@ equalBool? true false = no (λ ())
 equalBool? false true = no (λ ())
 equalBool? false false = yes refl
 
+-- Auxiliary function for an alternative solution to `equalNat?`
+suc-injective : {m n : Nat} → suc m ≡ suc n → m ≡ n
+suc-injective {m} {.m} refl = refl
+
 equalNat? : (m n : Nat) → Dec (m ≡ n)
 equalNat? zero zero = yes refl
 equalNat? zero (suc n) = no (λ ())
@@ -265,10 +314,9 @@ equalNat? (suc m) zero = no (λ ())
 equalNat? (suc m) (suc n) with equalNat? m n 
 equalNat? (suc m) (suc n) | yes eq = yes (cong suc eq)
 equalNat? (suc m) (suc n) | no neq = no (λ suc-m=suc-n → neq (cong (λ k → k - 1) suc-m=suc-n))
-  -- this last clause can be done in several ways, e.g. instead of `cong (λ k → k - 1)` you could use:
-suc-injective : (m n : Nat) → suc m ≡ suc n → m ≡ n
-suc-injective m .m refl = refl
-
+  -- this last clause can be done in several ways, here are two alternatives:
+--equalNat? (suc m) (suc n) | no neq = no (λ{ refl → neq refl}) -- May not work in all versions of Agda.
+--equalNat? (suc m) (suc n) | no neq = no (λ suc-m=suc-n → neq (suc-injective suc-m=suc-n))
 
 
 

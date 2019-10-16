@@ -23,8 +23,8 @@ The full documentation of Agda can be found at agda.readthedocs.io
 Part 1: Booleans and natural numbers
 ====================================
 
-By default, Agda is a very barebones language with only one builtin type called Set,
-so we have to define other types like numbers and booleans ourselves. Let's start by
+By default, Agda is a very barebones language with only few builtin types,
+so we have to define types like numbers and booleans ourselves. Let's start by
 defining the type of booleans. This is done by a 'data' declaration:
 -}
 
@@ -35,11 +35,13 @@ data Bool : Set where
 {-
 The first line of this definition declares a new type called Bool. The two subsequent
 lines declare two terms of this type: true and false, both of type Bool. These are
-called the constructors of the datatype. To check this definition, press C-c C-l in emacs.
-(this means you have to press Ctrl+c followed by Ctrl+l). This 'loads' the file.
+called the constructors of the datatype. To check this definition, select "load" in the
+Agda menu (or press Ctrl+c followed by Ctrl+l; hence the menu item shows C-c C-l).
+This 'loads' the file.
 If everything goes right, the code will be colored and you get a list of unsolved goals
 like "?0 : Bool". It's a good idea to (re)load the file often so you know everything is
 still fine.
+WARNING: Error messages will generally appear below this list of goals, so scroll down!
 
 Next, let's define our first function: negation. Since Agda supports unicode syntax,
 we can use the mathematical symbol '¬' for negation. In emacs, you can enter this
@@ -56,6 +58,13 @@ symbol by simply writing \lnot. Here are some other unicode symbols we will use:
 The unicode input mode should be enabled by default in emacs, but you can enable 
 or disable the unicode input mode by pressing Ctrl-\. 
 
+If you see a unicode character and want to know how to type it, put the text cursor
+on it and select "Information about the character at point" in the "Agda" menu.
+
+The possibility to use any unicode character in an identifier, requires that all
+identifiers be separated by whitespace. E.g. since `¬x` is a single valid identifier,
+negation of x should be written `¬ x`.
+
 Here is an incomplete definition of negation:
 -}
 
@@ -69,15 +78,21 @@ that ¬ is a function taking one argument of type Bool and returning a Bool.
 The second line is the definition, but it is incomplete: it contains a hole.
 Holes are parts of your Agda program that you haven't written yet. They are
 useful because they allow you to typecheck some part of the program before
-it's finished, and Agda can even give you the type of each hole. To add a hole
+it's finished, and Agda can even give you the type of each hole. For example,
+after loading the file, Agda will tell you `?0 : Bool`, meaning that the
+hole we have here, should be replaced with some value of type `Bool`.
+
+If you put the 
+
+To add a hole
 yourself, you can write ? or {!utter nonsense!} anywhere in your code and reload
-the file with C-c C-l. The {!...!} approach is useful if you temporarily want to
+the file (press C-c C-l). The {!...!} approach is useful if you temporarily want to
 replace some meaningful or erroneous code with a hole.
 
 To complete the definition of ¬, place your cursor inside the hole and press
 C-c C-c to perform a case split. Agda will ask you on which variable to do a
-case split, type x and press enter. This will generate two cases: ¬ true = ?
-and ¬ false = ?. To give the result in each of these cases, again place your
+case split, type x and press enter. This will generate two cases: `¬ true = ?`
+and `¬ false = ?`. To give the result in each of these cases, again place your
 cursor inside the first hole, write the desired expression and press C-c C-space
 to confirm.
 
@@ -86,23 +101,30 @@ Here is a list of some useful commands for interacting with Agda:
    C-c C-l         Load file
    C-c C-d         (after load) Deduce (infer) type of term
    C-c C-n         (after load) Normalize (evaluate) term
-   C-c C-,         (inside hole) Information about hole
+   C-c C-,         (inside hole) Information about hole (context and type of the hole)
+                                 ^^ THIS ONE IS EXTREMELY USEFUL! Use it often!
    C-c C-c         (inside hole) Case split
    C-c C-space     (inside hole) Give solution
    C-c C-r         (inside hole) Refine, using the goal's type and textual content
-   C-u C-u <...>   Do <...> but produce normalized output
+   C-u C-u <...>   Do <...> but produce normalized (maximally computed) output
 
    C-g             Cancel whatever you're doing
 
-More commands can be found in the Agda menu of Emacs, and even more online.
+More commands can be found in the Agda menu of Emacs, and even more at
+https://agda.readthedocs.io/en/v2.6.0.1/tools/emacs-mode.html
+
+Note: if you've changed code outside a hole since the last load, then the Agda interaction
+commands may be using outdated information. Reload often!
 
 Now try to define 'and' and 'or' on booleans yourself by using case splitting.
 These functions have type Bool → Bool → Bool. The arrow (→) is right associative,
 so this should be read as Bool → (Bool → Bool), i.e. they are functions that take
 one boolean and return another function that takes another boolean and returns a boolean.
 
-The underscores in the names of a function mean that it uses mixfix syntax, 
-the underscores are in the positions where the arguments should go.
+The underscores in the names of a function mean that it uses mixfix syntax. 
+They indicate the positions where the arguments should go, i.e. `a ∧ b` desugars to `_∧_ a b`.
+
+Try to use as few cases as possible (i.e. two cases).
 -}
 
 _∧_ : Bool → Bool → Bool
@@ -115,13 +137,11 @@ x ∨ y = {!!}
 Here is a polymorphic definition of the if-then-else function.
 The accolad notation {A : Set} means that A is an implicit (i.e. hidden)
 argument, so Agda tries to fill it in for you when you call the function.
-
-(When you load your file and code gets highlighted yellow, this indicates
-that Agda has failed to infer the value of an implicit argument.)
 -}
 if_then_else_ : {A : Set} → Bool → A → A → A
 (if true  then x else y) = x
 (if false then x else y) = y
+
 
 {- We can give an alternative definition of negation in terms of if_then_else_: -}
 ¬-alt : Bool → Bool
@@ -148,7 +168,7 @@ data Nat : Set where
   suc  : Nat → Nat
 
 {- 
-This pragma allows you to write regular numbers 0,1,2,... instead of zero,
+The following pragma allows you to write regular numbers 0,1,2,... instead of zero,
 suc zero, suc (suc zero), ...:
 -}
 {-# BUILTIN NATURAL Nat #-}
@@ -196,7 +216,12 @@ assistant. This means we can use Agda to formulate theorems and prove them,
 and Agda will check that the proofs are correct.
 
 Under the Curry-Howard correspondence, types correspond to propositions and
-terms of a type correspond to a proof of the corresponding proposition. 
+terms of a type correspond to a proof of the corresponding proposition. So in Agda,
+we state a proposition by giving a type, and we prove it by writing a program
+of that type.
+Therefore, in order to be able to use Agda as a proof assistant, it is paramount
+to understand the Curry-Howard correspondence.
+
 As an example, the type "A → B" in Agda corresponds to the proposition "A implies B".
 Here are some other types corresponding to propositional logic.
 -}
@@ -210,6 +235,8 @@ data ⊥ : Set where
   -- no constructors
 
 -- Product type (unicode: \times or \x). This corresponds to the proposition "A and B".
+-- The first line of this definition says that, for all `A : Set` and `B : Set`, we have
+-- `A × B : Set`. These type parameters A and B are in scope in the constructors' types.
 data _×_ (A B : Set) : Set where
   _,_ : A → B → A × B
 
@@ -219,7 +246,7 @@ fst (x , y) = x
 snd : {A B : Set} → A × B → B
 snd p = {!!}
 
--- Sum type (unicode: \uplus). This corresponds to the proposition "A or B".
+-- Coproduct type (unicode: \uplus). This corresponds to the proposition "A or B".
 data _⊎_ (A B : Set) : Set where
   left  : A → A ⊎ B
   right : B → A ⊎ B
@@ -313,7 +340,19 @@ The only constructor of this type is refl (short for reflexivity). Note that ref
 only allows us to construct a term of type 'x ≡ x' for some x, so we can only
 prove that a term is equal to itself. We will later see how we can derive the
 other properties of equality (such as symmetry and transitivity).
+-}
 
+{- (Side note for the curious)
+Observe how the *type parameter* {A : Set} is before the colon, whereas the indices* `A → A →` are behind it.
+So the first line says: for every {A : Set} (passed implicitly), we get a dependent type `_≡_ : A → A → Set`.
+The difference between putting variables before or after the colon is the following:
+* Type parameters are fixed (and in scope) throughout the definition: every constructor creates instances of the
+  equality type for the same value of A.
+* Type indices are not fixed throughout the definition. Our choice of constructor, and even the choice of
+  arguments we pass to the constructor, determines the indices in the type of the constructed object.
+-}
+
+{-
 One very useful application of the identity type is to write tests that are
 automatically checked by Agda. For example, we can write a test that
 ¬ (¬ true) is equal to true:
@@ -327,11 +366,6 @@ If you implemented the function ¬ correctly, you should be able to fill in
 refl in the hole (using C-c C-space). To see what happens when you try to
 prove a false statement, you can go back to the definition of ¬ and change
 "¬ false = true" into "¬ false = false" and reload the file (using C-c C-l).
-
-Note that identifiers in Agda can consist of almost any sequence of unicode 
-characters. This also means that ¬¬true is not the same as ¬ (¬ true): the former is 
-an identifier, while the latter is the double negation of true. So be sure to be 
-liberal in your use of whitespace!
 
 Hint: If you put the cursor in a hole and press C-u C-u C-c C-, then you get
 normalized (C-u C-u <...>) information about the hole (C-c C-,), including
@@ -354,9 +388,8 @@ You can also prove more general facts by adding arguments to a theorem, for exam
 -}
 ¬¬-elim : (b : Bool) → ¬ (¬ b) ≡ b
 {-
-To prove this lemma, you cannot use refl straight away because Agda cannot see that
-¬ (¬ b) is always equal to b from just the definition of ¬. Instead, you first have
-to do a case split on b (using C-c C-c)
+To prove this lemma, you cannot use refl straight away because Agda will not compute
+¬ (¬ b) when b is a variable. Instead, you first have to do a case split on b (using C-c C-c)
 -}
 ¬¬-elim b = {!!}
 
@@ -365,14 +398,13 @@ to do a case split on b (using C-c C-c)
 ∧-same : (b : Bool) → b ∧ b ≡ b
 ∧-same b = {!!}
 
-if-same : {A : Set} → (b : Bool) (x : A) → (if b then x else x) ≡ x
+if-same : {A : Set} → (b : Bool) → (x : A) → (if b then x else x) ≡ x
 if-same b x = {!!}
 
 
 {-
 Part 5: refl patterns and absurd patterns
 =========================================
-
 Here are some useful general properties of equality: symmetry, transitivity,
 and congruence. To prove them, we have to match on a value of type x ≡ y, i.e.
 a proof that x equals y. Since the only constructor of the identity type is
@@ -406,6 +438,12 @@ true-not-false : true ≡ false → ⊥
 true-not-false ()
 
 {-
+Absurd patterns also work for the empty type. Prove that a contradiction implies anything:
+-}
+⊥-elim : {A : Set} → ⊥ → A
+⊥-elim contradiction = {!!}
+
+{-
 Now use absurd patterns to prove that a natural number cannot be both zero and one.
 You may have to do a non-absurd case split on one of the arguments first. Try three
 different approaches:
@@ -419,6 +457,8 @@ not-zero-and-one' n eq0 eq1 = {!!}
 not-zero-and-one'' : (n : Nat) → n ≡ 0 → n ≡ 1 → ⊥
 not-zero-and-one'' n eq0 eq1 = {!!}
 
+--Note: Recent versions of Agda allow omitting certain absurd cases altogether.
+
 {-
 Here's another exercise: if 'b ∨ false' is equal to true, then b must be equal to true.
 Hint: if you start by trying to pattern match on `eq`, you get a very interesting error
@@ -426,6 +466,20 @@ message.
 -}
 ∨-first : (b : Bool) → b ∨ false ≡ true → b ≡ true
 ∨-first b eq = {!!}
+
+{-
+Pattern matching over an equality proof p : a ≡ b is only possible if a and b are:
+1. obviously different (then you get an absurd pattern),
+2. easy to equate. For example, if p : suc x ≡ 3, then pattern matching over p will replace x with 2.
+However, if p : x * 4 ≡ 12, then Agda is not smart enough to perform the division
+and conclude that x can be replaced with 3. It will tell you so when you try to match over p.
+-}
+
+easy-match : {x : Nat} → suc x ≡ 3 → x ≡ 2
+easy-match {x} p = {!!}
+
+harder-match : {x : Nat} → x * 4 ≡ 12 → x ≡ 3
+harder-match {x} p = {!!}
 
 {-
 Finally, it is worth noting that equality proofs contain no information other than their
@@ -440,6 +494,8 @@ not having UIP and instead viewing equality proofs as data. This is beyond the s
 of the Formal Systems course.
 The --without-K option in Agda disables the above proof of UIP. See the section titled
 'Without K' in the Agda documentation for more information.
+To activate --without-K in this file, add the following line at the top of this file:
+{-# OPTIONS --without-K #-}
 -}
 
 
@@ -448,22 +504,29 @@ The --without-K option in Agda disables the above proof of UIP. See the section 
 Part 6: More properties of natural numbers
 ==========================================
 
-As people, we know that 0 + n = n = n + 0.
+As people, we know that 0 + n = n and n = n + 0.
 The first equality is easy to prove ...
 -}
 plus0-left : (n : Nat) → 0 + n ≡ n
 plus0-left n = {!!}
 
-{- ... but the second one is a bit harder. Can you guess why? -}
+{- ... but the second one is a bit harder.
+
+This is because Agda cannot compute `n + 0` when n is a variable,
+since it doesn't know which case of the definition of _+_ it should apply.
+In general, in order to prove something about a function defined by pattern-matching,
+it is a good idea to pattern-match in a similar way in the proof.
+-}
 plus0-right : (n : Nat) → n + 0 ≡ n
-plus0-right zero = {!!}
-plus0-right (suc n) = {!!}
+plus0-right n = {!!}
 {-
 hint 1: you can make a recursive call `plus0-right n` to get a proof of `n + 0 ≡ n`
         Under the Curry-Howard correspondence, a recursive function corresponds to
         a proof by induction.
-hint 2: you may need to use the cong lemma from above to finish the proof.
+hint 2: you may need to invoke the `cong` lemma from above to finish the proof.
+-}
 
+{-
 Prove that addition on natural numbers is associative. Try to use as few cases
 as possible. (It's possible to use only 2!)
 -}
@@ -480,8 +543,8 @@ plus-comm m n = {!!}
 
 
 {-
-Part 7: Lambda-abstractions
-===========================
+Part 7: Lambda-abstractions and functions
+=========================================
 So far, we have been defining named functions: each function is first declared
 by giving its name and type, and then defined by giving one or more equations.
 However, we can also define nameless functions inline. The syntax is
@@ -507,8 +570,6 @@ State and prove (using _×_):
 If A implies (B and C), then A implies B and A implies C
 -}
 
-
-
 {-
 We can also define inline pattern matching functions. The syntax is:
 
@@ -526,6 +587,80 @@ If the first argument's type is already empty, we can simply write `λ ()`.
 -}
 lemma : {A B : Set} → (A → B) → (A ⊎ ⊥ → B) × (⊥ → A)
 lemma f = {!!}
+
+
+{-
+As we have seen before, functions can take implicit arguments.
+Agda then inserts the only possible argument that leads to a well-typed term.
+However, sometimes there is more than one possibility. Agda notifies you with a
+yellow highlight and a warning in the output.
+
+Consider the following:
+-}
+const : {A B : Set} → A → B → A
+const a b = a
+ambiguous-function : Bool → ⊥ → Nat
+ambiguous-function bool bot =
+  {!const 5 (if bool then ⊥-elim bot else ⊥-elim bot)!}
+{-
+Put the cursor in the hole above and press C-c C-space to replace it with it's contents. Reload.
+Figure out why Agda cannot possibly figure out the type of the if-expression. (Could you infer it?)
+
+We can solve this by making one of the arguments of `const`, `⊥-elim` or `if_then_else_`
+explicit:
+* We can write `⊥-elim {Bool} bot` in either the `then` or the `else` clause.
+  The accolads notify that you are passing an implicit argument.
+* We can make the implicit argument of `if_then_else_` explicit. Since there is no mixfix syntax for this,
+  we have to write
+  `if_then_else_ {Bool} bool (⊥-elim bot) (⊥-elim bot)`
+* We can make the second implicit argument of `const` explicit. This can be done by writing:
+  `const {_} {Bool}` (an underscore asks Agda to fill in the only possible well-typed value),
+  `const {B = Bool}` (the B points to the argument called B in the type of `const`)
+
+Fix the above definition so that there are no more yellow highlights.
+-}
+
+{-
+Lambda-expressions, like named functions, can take implicit arguments:
+-}
+if-zero : Nat → {A : Set} → A → A → A
+if-zero = λ {zero    {A} a b → a ;
+             (suc n) {A} a b → b}
+
+{-
+Furthermore, it's good to know that there are a few abberviations for function types.
+Most importantly:
+
+1. If we introduce multiple NAMED variables at once, we may omit arrows between them.
+   The arrow after the last named variable introduction, must stay.
+-}
+-- both arguments implicit, with arrow
+refl₁ : {A : Set} → {a : A} → a ≡ a 
+refl₁ = refl
+-- both arguments implicit, omit arrow in between (last arrow must stay)
+refl₂ : {A : Set} {a : A} → a ≡ a 
+refl₂ = refl
+-- both arguments explicit, with arrow
+refl₃ : (A : Set) → (a : A) → a ≡ a 
+refl₃ A a = refl
+-- both arguments implicit, omit arrow in between (last arrow must stay)
+refl₄ : (A : Set) (a : A) → a ≡ a 
+refl₄ A a = refl
+{-
+2. We can omit the type signatures of named variables, provided that we put a
+   ∀ (\forall) symbol in front of them.
+   Agda will then infer the variable's type, if possible.
+-}
+-- Implicit A without type signature, explicit a
+refl₅ : ∀ {A} (a : A) → a ≡ a
+refl₅ a = refl
+-- Explicit A without type signature, implicit a
+refl₆ : ∀ A {a : A} → a ≡ a
+refl₆ A = refl
+-- Explicit A and a, both without type signature.
+-- Uncomment and see what's wrong. Fix it somehow.
+--refl₇ : ∀ A a → a ≡ a
+--refl₇ A a = refl
 
 
 {- 
@@ -576,3 +711,21 @@ infix   4 if_then_else_
 infixl 10 _+_
 infixl 12 _*_
 infix   2 _≡_
+
+
+
+
+
+
+{-
+When you load your file and code gets highlighted yellow, this indicates
+that Agda has failed to infer the value of an implicit argument.
+You can resolve this by passing the argument explicitly.
+This is done by writing it between accolads, e.g.
+`if_then_else_ {Bool} true false false`. If there are multiple implicit arguments,
+you can specify which one you are passing, e.g.
+`if_then_else_ {A = Bool} true false false`. Then Agda looks up `A` in the type of
+`if_then_else`. There is no mixfix syntax for explicitly passing implicit arguments.
+
+Fix the following definition of useless-function:
+-}
