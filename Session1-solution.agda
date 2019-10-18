@@ -191,6 +191,8 @@ not-zero-and-one'' .1 () refl
 easy-match : {x : Nat} → suc x ≡ 3 → x ≡ 2
 easy-match {.2} refl = refl
 
+-- The main point here is that it's hard; depending on your definition of _*_ and _+_, it may be VERY hard.
+-- Don't worry about not being able to complete this one, that just proves the point.
 harder-match : {x : Nat} → x * 4 ≡ 12 → x ≡ 3
 harder-match {zero} ()
 harder-match {suc zero} ()
@@ -198,7 +200,7 @@ harder-match {suc (suc zero)} ()
 harder-match {suc (suc (suc zero))} p = refl
 harder-match {suc (suc (suc (suc x)))} ()
 -- New versions of Agda may allow omission of all clauses but the `refl` one,
--- so that the match is not that hard after all.
+-- so that the solution is not that hard after all.
 
 uip : {A : Set} {x y : A} {p q : x ≡ y} → p ≡ q
 uip {A} {x} {.x} {refl} {refl} = refl

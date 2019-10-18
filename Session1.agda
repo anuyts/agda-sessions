@@ -82,8 +82,6 @@ it's finished, and Agda can even give you the type of each hole. For example,
 after loading the file, Agda will tell you `?0 : Bool`, meaning that the
 hole we have here, should be replaced with some value of type `Bool`.
 
-If you put the 
-
 To add a hole
 yourself, you can write ? or {!utter nonsense!} anywhere in your code and reload
 the file (press C-c C-l). The {!...!} approach is useful if you temporarily want to
