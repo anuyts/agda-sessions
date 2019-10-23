@@ -14,7 +14,7 @@
 open import Session1-solution
 -}
 
-open import Data.Nat renaming (ℕ to Nat ; _≟_ to equalNat?) hiding (pred ; _≤_ ; compare)
+open import Data.Nat renaming (ℕ to Nat ; _≟_ to equalNat? ; _∸_ to _-_) hiding (pred ; _≤_ ; compare)
 open import Relation.Binary.PropositionalEquality
 open import Data.Bool renaming (not to ¬)
 open import Data.Unit hiding (_≤_)
@@ -30,7 +30,7 @@ is-zero (suc n) = false
 
 data List (A : Set) : Set where
   [] : List A
-  _::_ : (x : A) (xs : List A) → List A
+  _::_ : (x : A) → (xs : List A) → List A
 
 infixr 15 _::_
 
@@ -113,61 +113,63 @@ lookup-test₂ = refl
 --================
 
 data Vec (A : Set) : Nat → Set where
-  [] : Vec A 0
-  _::_ : {n : Nat} → A → Vec A n → Vec A (suc n)
+  []v : Vec A 0
+  _::v_ : {n : Nat} → A → Vec A n → Vec A (suc n)
+
+infixr 15 _::v_
 
 example-vec : Vec Nat 3
-example-vec = 1 :: 2 :: 3 :: []
+example-vec = 1 ::v 2 ::v 3 ::v []v
 
-head-Vec : {A : Set} {n : Nat} → Vec A (suc n) → A
-head-Vec {A} {n} (x :: xs) = x
+head-v : {A : Set} {n : Nat} → Vec A (suc n) → A
+head-v {A} {n} (x ::v xs) = x
 
-tail-Vec : {A : Set} {n : Nat} → Vec A (suc n) → Vec A n
-tail-Vec {A} {n} (x :: xs) = xs
+tail-v : {A : Set} {n : Nat} → Vec A (suc n) → Vec A n
+tail-v {A} {n} (x ::v xs) = xs
 
 -- Create a vector of length n containing only the number 0:
 zero-vec : (n : Nat) → Vec Nat n
-zero-vec zero = []
-zero-vec (suc n) = 0 :: (zero-vec n)
+zero-vec zero = []v
+zero-vec (suc n) = 0 ::v (zero-vec n)
 
-_++Vec_ : {A : Set} {m n : Nat} → Vec A m → Vec A n → Vec A (m + n)
-[] ++Vec ys = ys
-(x :: xs) ++Vec ys = x :: (xs ++Vec ys)
+_++v_ : {A : Set} {m n : Nat} → Vec A m → Vec A n → Vec A (m + n)
+[]v ++v ys = ys
+(x ::v xs) ++v ys = x ::v (xs ++v ys)
 
-map-Vec : {A B : Set} {n : Nat} → (A → B) → Vec A n → Vec B n
-map-Vec {A} {B} {.0} f [] = []
-map-Vec {A} {B} {.(suc _)} f (x :: xs) = (f x) :: (map-Vec f xs)
+map-v : {A B : Set} {n : Nat} → (A → B) → Vec A n → Vec B n
+map-v {A} {B} {.0} f []v = []v
+map-v {A} {B} {.(suc _)} f (x ::v xs) = (f x) ::v (map-v f xs)
 
 _·_ : {n : Nat} → Vec Nat n → Vec Nat n → Nat
-[] · [] = zero
-(x :: xs) · (y :: ys) = (x * y) + (xs · ys)
+[]v · []v = zero
+(x ::v xs) · (y ::v ys) = (x * y) + (xs · ys)
 
-·-test : example-vec · map-Vec suc example-vec ≡ 20
+·-test : example-vec · map-v suc example-vec ≡ 20
 ·-test = refl
 
 data Fin : Nat → Set where
-  zero : {n : Nat} → Fin (suc n)
-  suc  : {n : Nat} → Fin n → Fin (suc n)
+  zero-f : {n : Nat} → Fin (suc n)
+  suc-f  : {n : Nat} → Fin n → Fin (suc n)
   
 zero-Fin3 : Fin 3
-zero-Fin3 = zero
+zero-Fin3 = zero-f
 
 one-Fin3 : Fin 3
-one-Fin3 = suc zero
+one-Fin3 = suc-f zero-f
 
 two-Fin3 : Fin 3
-two-Fin3 = suc (suc zero)
+two-Fin3 = suc-f (suc-f zero-f)
 
-lookup-Vec : {A : Set} {n : Nat} → Fin n → Vec A n → A
-lookup-Vec {A} {.(suc _)} zero (x :: xs) = x
-lookup-Vec {A} {.(suc _)} (suc i) (x :: xs) = lookup-Vec i xs
+lookup-v : {A : Set} {n : Nat} → Fin n → Vec A n → A
+lookup-v {A} {.(suc _)} zero-f (x ::v xs) = x
+lookup-v {A} {.(suc _)} (suc-f i) (x ::v xs) = lookup-v i xs
 
-put-Vec : {A : Set} {n : Nat} → Fin n → A → Vec A n → Vec A n
-put-Vec zero a (x :: xs) = a :: xs
-put-Vec (suc i) a (x :: xs) = x :: put-Vec i a xs
+put-v : {A : Set} {n : Nat} → Fin n → A → Vec A n → Vec A n
+put-v zero-f a (x ::v xs) = a ::v xs
+put-v (suc-f i) a (x ::v xs) = x ::v put-v i a xs
 
-put-Vec-test : put-Vec one-Fin3 7 example-vec ≡ 1 :: 7 :: 3 :: []
-put-Vec-test = refl
+put-v-test : put-v one-Fin3 7 example-vec ≡ 1 ::v 7 ::v 3 ::v []v
+put-v-test = refl
 
 
 
@@ -176,7 +178,7 @@ put-Vec-test = refl
 --=======================
 
 data Σ (A : Set) (B : A → Set) : Set where
-  _,_ : (x : A) (y : B x) → Σ A B
+  _,_ : (x : A) → (y : B x) → Σ A B
 
 syntax Σ A (λ x → B) = Σ[ x ∈ A ] B
 
@@ -199,11 +201,23 @@ NonZero = Σ[ n ∈ Nat ] (is-zero n ≡ false)
 
 pred : NonZero → Nat
 pred (zero , ())
-pred (suc x , y) = x
+pred (suc n , eq) = n
 
 
 
--- Part 4: A verified sorting algorithm
+-- Part 4: The Pi type
+--=======================
+Π : (A : Set) → (B : A → Set) → Set
+Π A B = (x : A) → B x
+syntax Π A (λ x → B-of-x) = Π[ x ∈ A ] B-of-x
+
+n-n≡0 : (n : Nat) → (n - n) ≡ 0
+n-n≡0 zero = refl
+n-n≡0 (suc n) = n-n≡0 n
+
+
+
+-- Part 5: A verified sorting algorithm
 --=====================================
 
 data _≤_ : Nat → Nat → Set where
@@ -238,14 +252,29 @@ compare : (m n : Nat) → (m ≤ n) ⊎ (n ≤ m)
 compare zero n = left lz
 compare (suc m) zero = right lz
 compare (suc m) (suc n) with compare m n
-compare (suc m) (suc n) | left x = left (ls x)
-compare (suc m) (suc n) | right x = right (ls x)
+compare (suc m) (suc n) | left m≤n = left (ls m≤n)
+compare (suc m) (suc n) | right n≤m = right (ls n≤m)
 
+{-# TERMINATING #-}
 insert : (n : Nat) → (xs : SortedList) → List Nat
 insert n ([] , []-sorted) = n :: []
 insert n ((x :: xs) , x::xs-sorted) with compare n x
 insert n ((x :: xs) , (x≤xs , xs-sorted)) | left n≤x = n :: x :: xs
 insert n ((x :: xs) , (x≤xs , xs-sorted)) | right x≥n = x :: insert n (xs , xs-sorted)
+{-
+-- Note: some versions of Agda may issue a termination error for the above implementation of `insert`.
+-- We know that `insert` terminates because the second argument of the recursive call has a smaller first component,
+-- i.e. `xs` instead of `x :: xs`. You may need to help Agda by splitting up (currying) the pair in an auxiliary function,
+-- as below:
+insert' : (n : Nat) → (xs : List Nat) → IsSorted xs → List Nat
+insert' n [] []-sorted = n :: []
+insert' n (x :: xs) x::xs-sorted with compare n x
+insert' n (x :: xs) x::xs-sorted | left n≤x = n :: x :: xs
+insert' n (x :: xs) (x≤xs , xs-sorted) | right x≤n = x :: insert' n xs xs-sorted
+
+insert : (n : Nat) → (xs : SortedList) → List Nat
+insert n (xs , xs-sorted) = insert' n xs xs-sorted
+-}
 
 insert-≤all : {m : Nat} → (n : Nat) → m ≤ n → (xs : SortedList) → m ≤all proj₁ xs → m ≤all insert n xs
 insert-≤all {m} n m≤n ([] , []-sorted) m≤[] = m≤n , tt
@@ -254,12 +283,25 @@ insert-≤all {m} n m≤n ((x :: xs) , (x≤xs , xs-sorted)) m≤x::xs | left n�
 insert-≤all {m} n m≤n ((x :: xs) , (x≤xs , xs-sorted)) (m≤x , m≤xs) | right x≤n =
   m≤x , insert-≤all n (trans≤ m≤x x≤n) (xs , xs-sorted) m≤xs
 
+{-# TERMINATING #-}
 insert-is-sorted : (n : Nat) → (xs : SortedList) → IsSorted (insert n xs)
 insert-is-sorted n ([] , []-sorted) = tt , tt
 insert-is-sorted n ((x :: xs) , (x≤xs , xs-sorted)) with compare n x
 insert-is-sorted n ((x :: xs) , (x≤xs , xs-sorted)) | left n≤x = (n≤x , (trans-≤all n≤x x≤xs)) , (x≤xs , xs-sorted)
 insert-is-sorted n ((x :: xs) , (x≤xs , xs-sorted)) | right x≤n =
   insert-≤all n x≤n (xs , xs-sorted) x≤xs , insert-is-sorted n (xs , xs-sorted)
+{-
+-- Same remark as for insert.
+insert-is-sorted' : (n : Nat) → (xs : List Nat) → (xs-sorted : IsSorted xs) → IsSorted (insert n (xs , xs-sorted))
+insert-is-sorted' n [] []-sorted = tt , tt
+insert-is-sorted' n (x :: xs) (x≤xs , xs-sorted) with compare n x
+insert-is-sorted' n (x :: xs) (x≤xs , xs-sorted) | left n≤x = (n≤x , (trans-≤all n≤x x≤xs)) , (x≤xs , xs-sorted)
+insert-is-sorted' n (x :: xs) (x≤xs , xs-sorted) | right x≤n =
+  insert-≤all n x≤n (xs , xs-sorted) x≤xs , insert-is-sorted' n xs xs-sorted
+
+insert-is-sorted : (n : Nat) → (xs : SortedList) → IsSorted (insert n xs)
+insert-is-sorted n (xs , xs-sorted) = insert-is-sorted' n xs xs-sorted
+-}
 
 insert-sorted : Nat → SortedList → SortedList
 insert-sorted n xs = insert n xs , insert-is-sorted n xs
@@ -272,58 +314,4 @@ test-list : List Nat
 test-list = 3 :: 1 :: 2 :: 76 :: 34 :: 15 :: 155 :: 11 :: 1 :: []
 
 test-sort : proj₁ (sort test-list) ≡ 1 :: 1 :: 2 :: 3 :: 11 :: 15 :: 34 :: 76 :: 155 :: []
-test-sort = refl
-
-
-
-
-
-ifDec_then_else_ : {A B : Set} → Dec A → B → B → B
-ifDec yes x then b₁ else b₂ = b₁
-ifDec no x then b₁ else b₂ = b₂
-
-case_return_of_ : ∀ {A : Set} → (a : A) → (B : A → Set) → ((x : A) → B x) → B a
-case a return B of f = f a
-
-if-ifnot : ∀ {A : Set} {b : Bool} {x y : A} → (if b then x else y) ≡ (if ¬ b then y else x)
-if-ifnot {A}{b}{x}{y} =
-  case b
-  return (λ b' → (if b' then x else y) ≡ (if ¬ b' then y else x))
-  of λ { false → refl ; true → refl }
-
-count : Nat → List Nat → Nat
-count n [] = 0
-count n (x :: xs) = ifDec equalNat? n x then suc (count n xs) else count n xs
-
-{- or directly:
-count : Nat → List Nat → Nat
-count n [] = zero
-count n (x :: xs) with equalNat? n x
-count n (x :: xs) | yes _ = suc (count n xs)
-count n (x :: xs) | no _ = count n xs
--}
-
-HaveSameContents : List Nat → List Nat → Set
-HaveSameContents xs ys = (n : Nat) → count n xs ≡ count n ys
-
-count-insert : (m n : Nat) → (xs : SortedList) →
-  count m (insert n xs) ≡ (ifDec equalNat? m n then suc else λ k → k) (count m (proj₁ xs))
-count-insert m n ([] , []-sorted) with equalNat? m n
-count-insert m n ([] , []-sorted) | yes x = refl
-count-insert m n ([] , []-sorted) | no x = refl
-count-insert m n ((x :: xs) , (x≤xs , xs-sorted)) with compare n x
-count-insert m n ((x :: xs) , (x≤xs , xs-sorted)) | left n≤x with equalNat? m n
-count-insert m n ((x₁ :: xs) , (x≤xs , xs-sorted)) | left n≤x | (yes _) = refl
-count-insert m n ((x₁ :: xs) , (x≤xs , xs-sorted)) | left n≤x | (no _) = refl
-count-insert m n ((x :: xs) , (x≤xs , xs-sorted)) | right x≤n
-  with equalNat? m n | equalNat? m x | count-insert m n (xs , xs-sorted)
-count-insert m n ((x :: xs) , (x≤xs , xs-sorted)) | right x≤n | (yes x₁) | (yes x₂) | e = cong suc e
-count-insert m n ((x :: xs) , (x≤xs , xs-sorted)) | right x≤n | (no x₁) | (yes x₂) | e = cong suc e
-count-insert m n ((x :: xs) , (x≤xs , xs-sorted)) | right x≤n | (yes x₁) | (no x₂) | e = e
-count-insert m n ((x :: xs) , (x≤xs , xs-sorted)) | right x≤n | (no x₁) | (no x₂) | e = e
-
-sort-permutes : (xs : List Nat) → HaveSameContents xs (proj₁ (sort xs))
-sort-permutes [] n = refl
-sort-permutes (x :: xs) n with equalNat? n x | count-insert n x (sort xs)
-sort-permutes (x :: xs) n | yes _ | e = trans (cong suc (sort-permutes xs n)) (sym e)
-sort-permutes (x :: xs) n | no _ | e = trans (sort-permutes xs n) (sym e)
+test-sort = {!refl!}

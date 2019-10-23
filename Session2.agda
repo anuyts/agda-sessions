@@ -31,7 +31,7 @@ open import Session1
    For the project, we will use the Agda standard library.
 -}
 --Natural numbers and related tools.
-open import Data.Nat renaming (ℕ to Nat ; _≟_ to equalNat?) hiding (pred ; _≤_ ; compare)
+open import Data.Nat renaming (ℕ to Nat ; _≟_ to equalNat? ; _∸_ to _-_) hiding (pred ; _≤_ ; compare)
 --Propositional equality
 --  Write `open ≡-Reasoning` to get access to some tools for proving equality.
 open import Relation.Binary.PropositionalEquality
@@ -56,14 +56,11 @@ is-zero (suc n) = false
 --   x :: xs  is a list with head x and tail xs
 data List (A : Set) : Set where
   [] : List A
-  _::_ : (x : A) (xs : List A) → List A
+  _::_ : (x : A) → (xs : List A) → List A
 -- (The advantage of naming the constructor's arguments, is that Agda will use these names
 -- as default names when pattern matching using C-c C-c.)
 
--- Note that an arrow is missing in the type of _::_. See agda.readthedocs.io > function types
--- for details on how function types may be abbreviated.
-
--- The infix statement allows us to write fewer parentheses
+-- The infix statement determines the operator's priority and allows us to write fewer parentheses
 infixr 15 _::_
 
 example-list : List Nat
@@ -113,7 +110,10 @@ xs ++ ys = {!!}
 ++-test₂ = {!!}
 
 -- Prove that the length of the concatenation of two lists is the sum of the
--- lengths of the two lists:
+-- lengths of the two lists.
+-- Hint: This is easy if your definitions of _+_ and _++_ look very similar. If you're importing
+-- session 1 rather than the standard library and are having difficulties,
+-- then you may want to reconsider how you can define _+_ more similarly to _++_.
 ++-length : {A : Set} (xs ys : List A) → length (xs ++ ys) ≡ length xs + length ys
 ++-length xs ys = {!!}
 
@@ -126,7 +126,6 @@ map-test = {!!}
 
 double-all : List Nat → List Nat
 double-all xs = map (λ x → x + x) xs
--- lambda expressions can be used to define in-line functions
 
 double-all-test : double-all example-list ≡ 2 :: 4 :: 6 :: []
 double-all-test = {!!}
@@ -156,8 +155,10 @@ lookup-test₂ = {!!}
 -- that gives better guarantees about the length of the list:
 
 data Vec (A : Set) : Nat → Set where
-  [] : Vec A 0
-  _::_ : {n : Nat} → A → Vec A n → Vec A (suc n)
+  []v : Vec A 0
+  _::v_ : {n : Nat} → A → Vec A n → Vec A (suc n)
+  
+infixr 15 _::v_
 
 {-
 The first line declares `Vec A` as a function mapping natural numbers to "sets" (types).
@@ -172,18 +173,18 @@ The other lines declare the constructors. Note how they interact with the index 
 -}
 
 example-vec : Vec Nat 3
-example-vec = 1 :: 2 :: 3 :: []
--- example-vec = 1 :: 2 :: []
+example-vec = 1 ::v 2 ::v 3 ::v []v
+-- example-vec = 1 ::v 2 ::v []v
 -- ^ this example wouldn't typecheck, as the length is 2, but the type is 'Vec Nat 3'
 
 -- If we use vectors, we don't need Maybe in the return type of head and tail.
 -- Instead, we only allow these functions to be called on a vector of length at
 -- least one (i.e. a vector of type 'Vec A (suc n)' for some n : Nat).
-head-Vec : {A : Set} {n : Nat} → Vec A (suc n) → A
-head-Vec {A} {n} xs = {!!}
+head-v : {A : Set} {n : Nat} → Vec A (suc n) → A
+head-v {A} {n} xs = {!!}
 
-tail-Vec : {A : Set} {n : Nat} → Vec A (suc n) → Vec A n
-tail-Vec {A} {n} xs = {!!}
+tail-v : {A : Set} {n : Nat} → Vec A (suc n) → Vec A n
+tail-v {A} {n} xs = {!!}
 
 -- Create a vector of length n containing only the number 0:
 zero-vec : (n : Nat) → Vec Nat n
@@ -194,19 +195,18 @@ zero-vec n = {!!}
 -- Thanks to the more informative types, C-c C-r (refine) will be more helpful in empty
 -- goals, and C-c C-a (program/proof search) will get it right more often.
 
--- Remark that in Agda, we can overload constructor names but not function names.
-_++Vec_ : {A : Set} {m n : Nat} → Vec A m → Vec A n → Vec A (m + n)
-xs ++Vec ys = {!!}
+_++v_ : {A : Set} {m n : Nat} → Vec A m → Vec A n → Vec A (m + n)
+xs ++v ys = {!!}
 
-map-Vec : {A B : Set} {n : Nat} → (A → B) → Vec A n → Vec B n
-map-Vec {A}{B}{n} f xs = {!!}
+map-v : {A B : Set} {n : Nat} → (A → B) → Vec A n → Vec B n
+map-v {A}{B}{n} f xs = {!!}
 
 -- It is also possible to enforce that two input vectors have the same length.
 -- For example, we can calculate the dot product (as in physics) of two vectors (unicode \cdot):
 _·_ : {n : Nat} → Vec Nat n → Vec Nat n → Nat
 xs · ys = {!!}
 
-·-test : example-vec · map-Vec suc example-vec ≡ 20
+·-test : example-vec · map-v suc example-vec ≡ 20
 ·-test = {!!}
 
 -- In order to implement a lookup function on vectors, we first need to
@@ -215,39 +215,38 @@ xs · ys = {!!}
 -- These types are called Fin n because all finite types with n elements are
 -- isomorphic to Fin n.
 data Fin : Nat → Set where
-  zero : {n : Nat} → Fin (suc n)
-  suc  : {n : Nat} → Fin n → Fin (suc n)
+  zero-f : {n : Nat} → Fin (suc n)
+  suc-f  : {n : Nat} → Fin n → Fin (suc n)
 
 -- Fin 3 contains the elements `zero`, `suc zero`, and `suc (suc zero)`:
 zero-Fin3 : Fin 3
-zero-Fin3 = zero
+zero-Fin3 = zero-f
 
 one-Fin3 : Fin 3
-one-Fin3 = suc zero
+one-Fin3 = suc-f zero-f
 
 two-Fin3 : Fin 3
-two-Fin3 = suc (suc zero)
+two-Fin3 = suc-f (suc-f zero-f)
 
--- ... but not `suc (suc (suc zero))`:
---three-Fin3 : Fin 3
---three-Fin3 = suc (suc (suc zero))
+-- ... but not `suc-f (suc-f (suc-f zero-f))`:
+-- three-Fin3 : Fin 3
+-- three-Fin3 = suc-f (suc-f (suc-f zero-f))
 
 -- (try to uncomment the above definition to see what goes wrong).
 
 -- Now that we have the Fin type, we can write a version of lookup on vectors
 -- that doesn't have Maybe in its return type. Try to do this now:
-lookup-Vec : {A : Set} {n : Nat} → Fin n → Vec A n → A
-lookup-Vec {A}{n} i xs = {!!}
-
+lookup-v : {A : Set} {n : Nat} → Fin n → Vec A n → A
+lookup-v {A}{n} i xs = {!!}
 -- Notice that the type of this function guarantees that the index i will never
 -- be out of the bounds of the vector xs.
 
 -- Also write a function that sets the i-th value in a vector to a given value:
-put-Vec : {A : Set} {n : Nat} → Fin n → A → Vec A n → Vec A n
-put-Vec i a xs = {!!}
+put-v : {A : Set} {n : Nat} → Fin n → A → Vec A n → Vec A n
+put-v i a xs = {!!}
 
-put-Vec-test : put-Vec one-Fin3 7 example-vec ≡ 1 :: 7 :: 3 :: []
-put-Vec-test = {!!}
+put-v-test : put-v one-Fin3 7 example-vec ≡ 1 ::v 7 ::v 3 ::v []v
+put-v-test = {!!}
 
 
 
@@ -256,13 +255,14 @@ put-Vec-test = {!!}
 --=======================
 
 -- Another very important type for dependently typed programming (and proving) is
--- the Σ-type (unicode input: \Sigma or \GS). You can think of it as a type of tuples
+-- the Σ-type (unicode input: \Sigma or \GS for Greek S), aka dependent pair type.
+-- You can think of it as a type of pairs
 -- (x , y) where the type of y can depend on the value of x.
 data Σ (A : Set) (B : A → Set) : Set where
-  _,_ : (x : A) (y : B x) → Σ A B
+  _,_ : (x : A) → (y : B x) → Σ A B
 
 -- This syntax declaration allows us to write Σ[ x ∈ A ] (B x) instead of Σ A (λ x → B x):
-syntax Σ A (λ x → B) = Σ[ x ∈ A ] B
+syntax Σ A (λ x → B-of-x) = Σ[ x ∈ A ] B-of-x
 
 {-
 Under the Curry-Howard correspondence, `Σ[ x ∈ A ] (B x)` means "there is some `x : A`
@@ -299,8 +299,28 @@ pred n = {!!}
 
 
 
+-- Part 4: The Pi type
+--=======================
+-- The Π-type or dependent function type is in theoretical papers and some other languages often
+-- denoted with a Π, but not in Agda. Of course, we can define the symbol Π ourselves.
+-- The Π-type is a type of functions `f` for which the type of `f x` depends on the value of `x`.
+-- We've been using such dependent functions all along:
+Π : (A : Set) → (B : A → Set) → Set
+Π A B = (x : A) → B x
+syntax Π A (λ x → B-of-x) = Π[ x ∈ A ] B-of-x
+-- Of course, neither the symbol Π nor the syntax for it is very useful, as Agda provides primitive
+-- syntax for dependent function types. So they are here just to demonstrate the parallel with the Σ-type.
 
--- Part 4: A verified sorting algorithm
+{-
+Under the Curry-Howard correspondence, `Π[ x ∈ A ] (B x)` or `(x : A) → B x` means
+"for all `x : A`, `B x` is true." For example:
+For all natural numbers n, n minus n equals 0:
+-}
+n-n≡0 : (n : Nat) → (n - n) ≡ 0
+n-n≡0 n = {!!}
+
+
+-- Part 5: A verified sorting algorithm
 --=====================================
 -- As a bigger example, we will define a type of sorted lists of natural numbers.
 
@@ -389,52 +409,4 @@ test-list = 3 :: 1 :: 2 :: 76 :: 34 :: 15 :: 155 :: 11 :: 1 :: []
 -- If your implementation is correct, you should be able to fill in refl here:
 test-sort : proj₁ (sort test-list) ≡ 1 :: 1 :: 2 :: 3 :: 11 :: 15 :: 34 :: 76 :: 155 :: []
 test-sort = {!!}
-
-
-
-
-
-{- Challenge:
-The sort function produces sorted lists from lists. But so does the function 
-(λ xs → ([], tt)) that maps
-any list xs to the empty sorted list. What property uniquely defines sort? State it
-and prove it.
-
-The following tools might come in handy (although none of them is strictly necessary):
--}
-
-ifDec_then_else_ : {A B : Set} → Dec A → B → B → B
-ifDec cond then b₁ else b₂ = {!!}
-
--- The following is useful for inline pattern matching
-case_return_of_ : ∀ {A : Set} → (a : A) → (B : A → Set) → ((x : A) → B x) → B a
-case a return B of f = f a
--- For example:
-if-ifnot : ∀ {A : Set} {b : Bool} {x y : A} → (if b then x else y) ≡ (if ¬ b then y else x)
-if-ifnot {A}{b}{x}{y} =
-  case b
-  return (λ b' → (if b' then x else y) ≡ (if ¬ b' then y else x))
-  of λ { false → refl ; true → refl }
-
--- `count n xs` counts the number of occurrences of `n` in `xs`:
-count : Nat → List Nat → Nat
-count n xs = {!!}
--- You can use `equalNat?` from last session.
-
-{-
-Two lists have the same contents if every number n occurs equally often in each one.
-Under the Curry-Howard correspondence, "forall x : A, B x holds" translates to
-`(x : A) → B x`
--}
-HaveSameContents : List Nat → List Nat → Set
-HaveSameContents xs ys = (n : Nat) → count n xs ≡ count n ys
-
-{- Hint: You may need some advanced use of with-clauses.
-When you add a with-clause for matching over some expression `expr`, then any
-occurrence of `expr` in the goal type will be replaced by the pattern `p`.
-However, this is only done in the goal type. If you want to make use of another
-expression `thing` of type `B expr`, but you want to use it as having type `B p`,
-then you have to add both in a single with-clause.
-See: http://agda.readthedocs.io/en/v2.5.2/language/with-abstraction.html#simultaneous-abstraction
--}
 
