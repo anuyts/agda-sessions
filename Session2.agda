@@ -411,3 +411,38 @@ test-list = 3 :: 1 :: 2 :: 76 :: 34 :: 15 :: 155 :: 11 :: 1 :: []
 test-sort : proj₁ (sort test-list) ≡ 1 :: 1 :: 2 :: 3 :: 11 :: 15 :: 34 :: 76 :: 155 :: []
 test-sort = {!!}
 
+
+
+
+-- Part 6: Using equality proofs
+--==============================
+{-
+A frequently asked question is: how can one use an equality proof.
+
+The answer is: by pattern matching. Pattern matching over an equality proof p : a ≡ b is only possible if a and b
+
+ * are obviously different (then you get an absurd pattern),
+ * easy to equate.
+
+If the equation is not easily solved, then you can turn one of its sides into a variable by with-abstracting over it.
+Of course an equation in which one side is a variable, is easily solved.
+You can find a good example in the Agda docs:
+https://agda.readthedocs.io/en/v2.5.3/language/with-abstraction.html#simultaneous-abstraction
+
+We will consider an example here as well. Suppose we know:
+  x + y = x * x
+Then clearly, if `x + y` is even, then so is `x + x`. Let's prove this:
+-}
+example : {x y : Nat} → x + y ≡ x * x → IsEven (x + y) → IsEven (x * x)
+example {x} {y} p x+y-is-even = {!!}
+{-
+If you try to pattern-match on p, you get an error, because the equation is too difficult for Agda to solve.
+For this reason, we first turn one side into a variable:
+example {x} {y} p x+y-is-even with x + y
+example {x} {y} p x+y-is-even | x+y = ?
+Now, in the hole, the expression `x + y` is replaced with the variable `x+y` in the types of all variables in scope,
+as well as in the required type of the hole.
+If we subsequently pattern-match on p, then p becomes refl and --- as this is required for refl to be well-typed ---
+the variable `x+y` is replaced with the expression `x * y`.
+Thus, at this point, the type of `x+y-is-even` has become `IsEven (x * x)`, and the variable can simply be used on the right.
+-}
