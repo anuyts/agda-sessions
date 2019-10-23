@@ -320,6 +320,7 @@ n-n≡0 : (n : Nat) → (n - n) ≡ 0
 n-n≡0 n = {!!}
 
 
+
 -- Part 5: A verified sorting algorithm
 --=====================================
 -- As a bigger example, we will define a type of sorted lists of natural numbers.

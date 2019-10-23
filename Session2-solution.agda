@@ -312,4 +312,4 @@ test-list : List Nat
 test-list = 3 :: 1 :: 2 :: 76 :: 34 :: 15 :: 155 :: 11 :: 1 :: []
 
 test-sort : proj₁ (sort test-list) ≡ 1 :: 1 :: 2 :: 3 :: 11 :: 15 :: 34 :: 76 :: 155 :: []
-test-sort = {!refl!}
+test-sort = refl
