@@ -320,6 +320,13 @@ test-sort = refl
 
 
 
-example : {x y : Nat} → x + y ≡ x * x → IsEven (x + y) → IsEven (x * x)
-example {x} {y} p x+y-is-even with x + y
-example {x} {y} refl x+y-is-even | .(x * x) = x+y-is-even
+example : {x y : Nat} → x + y ≡ x * x → IsEven (x * x) → IsEven (x + y)
+example {x} {y} p x*x-is-even with x * x
+example {x} {y} refl x*x-is-even | .(x + y) = x*x-is-even
+
+postulate
+  even-square : {x : Nat} → IsEven x → IsEven (x * x)
+
+example2 : {x y : Nat} → x + y ≡ x * x → IsEven x → IsEven (x + y)
+example2 {x} {y} p x-is-even with x * x | even-square x-is-even
+example2 {x} {y} refl x-is-even | .(x + y) | x*x-is-even = x*x-is-even

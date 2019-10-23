@@ -433,16 +433,39 @@ We will consider an example here as well. Suppose we know:
   x + y = x * x
 Then clearly, if `x + y` is even, then so is `x + x`. Let's prove this:
 -}
-example : {x y : Nat} → x + y ≡ x * x → IsEven (x + y) → IsEven (x * x)
-example {x} {y} p x+y-is-even = {!!}
+example : {x y : Nat} → x + y ≡ x * x → IsEven (x * x) → IsEven (x + y)
+example {x} {y} p x*x-is-even = {!!}
 {-
 If you try to pattern-match on p, you get an error, because the equation is too difficult for Agda to solve.
 For this reason, we first turn one side into a variable:
-example {x} {y} p x+y-is-even with x + y
-example {x} {y} p x+y-is-even | x+y = ?
-Now, in the hole, the expression `x + y` is replaced with the variable `x+y` in the types of all variables in scope,
+example {x} {y} p x*x-is-even with x * x
+example {x} {y} p x*x-is-even | x*x = ?
+Now, in the hole, the expression `x * x` is replaced with the variable `x*x` in the types of all variables in scope,
 as well as in the required type of the hole.
 If we subsequently pattern-match on p, then p becomes refl and --- as this is required for refl to be well-typed ---
-the variable `x+y` is replaced with the expression `x * y`.
-Thus, at this point, the type of `x+y-is-even` has become `IsEven (x * x)`, and the variable can simply be used on the right.
+the variable `x*x` is replaced with the expression `x + y`.
+Thus, at this point, the type of `x*x-is-even` has become `IsEven (x + y)`, and the variable can simply be used on the right.
+-}
+
+{-
+This technique is a bit subtle however. Suppose we know that the square of an even number is even:
+-}
+postulate
+  even-square : {x : Nat} → IsEven x → IsEven (x * x)
+{-
+Let's try to prove the same, but from the knowledge that x is even.
+-}
+example2 : {x y : Nat} → x + y ≡ x * x → IsEven x → IsEven (x + y)
+example2 {x} {y} p x-is-even with x * x
+example2 {x} {y} p x-is-even | x*x = {!!}
+{-
+If we proceed as before:
+  1. match over p
+  2. fill out `even-square x-is-even` on the right
+then we get an error: the type of `even-square x-is-even` has NOT become `IsEven (x + y)` but is still `IsEven (x * x)`.
+The problem is that we came up with this expression AFTER with-abstracting over `x * x`.
+The solution is to with-abstract over both simultaneously:
+example2 {x} {y} p x-is-even with x * x | even-square x-is-even
+example2 {x} {y} p x-is-even | x*x | x*x-is-even = {!!}
+Now the type of `x*x-is-even` is `IsEven x*x` and pattern-matching over `p` will turn that into `IsEven (x + y)`.
 -}
