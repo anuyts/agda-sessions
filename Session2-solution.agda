@@ -255,7 +255,6 @@ compare (suc m) (suc n) with compare m n
 compare (suc m) (suc n) | left m≤n = left (ls m≤n)
 compare (suc m) (suc n) | right n≤m = right (ls n≤m)
 
-{-# TERMINATING #-}
 insert : (n : Nat) → (xs : SortedList) → List Nat
 insert n ([] , []-sorted) = n :: []
 insert n ((x :: xs) , x::xs-sorted) with compare n x
@@ -283,7 +282,6 @@ insert-≤all {m} n m≤n ((x :: xs) , (x≤xs , xs-sorted)) m≤x::xs | left n�
 insert-≤all {m} n m≤n ((x :: xs) , (x≤xs , xs-sorted)) (m≤x , m≤xs) | right x≤n =
   m≤x , insert-≤all n (trans≤ m≤x x≤n) (xs , xs-sorted) m≤xs
 
-{-# TERMINATING #-}
 insert-is-sorted : (n : Nat) → (xs : SortedList) → IsSorted (insert n xs)
 insert-is-sorted n ([] , []-sorted) = tt , tt
 insert-is-sorted n ((x :: xs) , (x≤xs , xs-sorted)) with compare n x
