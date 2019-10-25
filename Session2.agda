@@ -14,10 +14,10 @@
 
 {-
 -- You can either import the solution of the previous exercise session:
-open import Session1
+open import Session1 hiding (_×_)
 -}
 
-{- Or you can import the necessary materials from the Agda standard library (is-zero needs to be reimplemented).
+{- Xor you can import the necessary materials from the Agda standard library (is-zero needs to be reimplemented).
 
    An import with a `renaming` clause renames objects as mentioned.
    An import with a `hiding` clause hides the mentioned objects.
