@@ -32,9 +32,9 @@ data IsValue : Term → Set where
   valFalse : IsValue tmFalse
 
 data _↝_ : Term → Term → Set where
-  E-IfTrue : {t2 t3 : Term} → ((tmIf tmTrue t2 t3) ↝ t2)
-  E-IfFalse : {t2 t3 : Term} → ((tmIf tmFalse t2 t3) ↝ t3)
-  E-If : {t1 t1' t2 t3 : Term} → t1 ↝ t1' → tmIf t1 t2 t3 ↝ tmIf t1' t2 t3
+  e-IfTrue : {t2 t3 : Term} → (tmIf tmTrue t2 t3 ↝ t2)
+  e-IfFalse : {t2 t3 : Term} → (tmIf tmFalse t2 t3 ↝ t3)
+  e-If : {t1 t1' t2 t3 : Term} → t1 ↝ t1' → tmIf t1 t2 t3 ↝ tmIf t1' t2 t3
 
 IsNormal : Term → Set
 IsNormal t = {t' : Term} → (t ↝ t') → ⊥
@@ -50,8 +50,7 @@ infixr 0 step_,_
 s = tmIf tmTrue tmFalse tmFalse
 t = tmIf s tmTrue tmTrue
 test-eval1 : tmIf t tmFalse tmFalse ↝* tmFalse
-test-eval1 = (
-    step E-If (E-If E-IfTrue) ,
-    step E-If E-IfFalse ,
-    step E-IfTrue , done
-  )
+test-eval1 = step e-If (e-If e-IfTrue) ,
+             step e-If e-IfFalse ,
+             step e-IfTrue ,
+             done

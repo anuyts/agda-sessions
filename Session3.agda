@@ -46,7 +46,7 @@ data IsValue : Term → Set where
 -- To give the operational semantics of our language, we define the one-step evaluation
 -- relation ↝ (unicode input: \r~) as an indexed datatype in Agda.
 data _↝_ : Term → Term → Set where
-  e-IfTrue : {t2 t3 : Term} → ((tmIf tmTrue t2 t3) ↝ t2)
+  e-IfTrue : {t2 t3 : Term} → (tmIf tmTrue t2 t3 ↝ t2)
   -- Add more constructors here, one for each evaluation rule
 
 -- A term is normal if it doesn't evaluate any further
@@ -61,8 +61,8 @@ values-normal {t} vt {t'} et = {!!}
 -- _↝*_ is the multi-step evaluation relation:
 -- x ↝* y means that x ↝ x1 ↝ x2 ↝ ... ↝ y
 data _↝*_ : Term → Term → Set where
-  done : {x : Term} → (x ↝* x)
-  step_,_ : {x x1 y : Term} → (x ↝ x1) → (x1 ↝* y) → (x ↝* y)
+  done : {t : Term} → (t ↝* t)
+  step_,_ : {t t' t'' : Term} → (t ↝ t') → (t' ↝* t'') → (t ↝* t'')
 infixr 0 step_,_
 
 -- Exercise: as a test, state and prove that
@@ -126,14 +126,14 @@ inversion-true {tyR} d = {!!}
 
 -- Uniqueness of types (see TAPL p. 94):
 uniqueness-of-types : {t : Term} {tyT1 tyT2 : Type} → t ∈ tyT1 → t ∈ tyT2 → tyT1 ≡ tyT2
-uniqueness-of-types d1 d2 = {!!}
+uniqueness-of-types {t} {tyT1} {tyT2} d1 d2 = {!!}
 
 -- Part 4: Safety = progress + preservation (see TAPL p. 96-97)
 --=============================================================
 
 -- First, prove the canonical forms lemma (lemma 8.3.1):
 canonical-forms-bool : {t : Term} → (IsValue t) → (t ∈ tyBool) → (t ≡ tmTrue) ⊎ (t ≡ tmFalse)
-canonical-forms-bool vt dt = {!!}
+canonical-forms-bool {t} vt dt = {!!}
 
 -- Also state and prove the canonical forms lemma for the Nat type:
 -- (i.e. prove that any value of type Nat is a numeric value)
@@ -141,10 +141,9 @@ canonical-forms-nat : {!!}
 canonical-forms-nat = {!!}
 
 -- Now you are ready to prove progress and preservation of this language.
-
-
+-- Note: keeping the implicit arguments will make it more clear what you are doing, but will also clutter your proof.
 preservation : {t t' : Term} {tyT : Type} → (t ↝ t') → (t ∈ tyT) → (t' ∈ tyT)
-preservation e1 d1 = {!!}
+preservation {t} {t'} {tyT} e1 d1 = {!!}
 
 -- Hint: you can use the `with` syntax to pattern match on the value of a
 -- function call. For an example of how to use `with`, you can look at
@@ -153,6 +152,9 @@ preservation e1 d1 = {!!}
 -- Hint: you can write _ as an expression; Agda will then infer its value.
 -- This is only possible when only one value would type-check (e.g. the first
 -- component of a dependent pair).
+
+-- Hint: if you remove the dot (.) from a forced pattern, then you can name its arguments.
+-- e.g. you can turn `{.tmIf _ _ _}` into `{tmIf t1 t2 t3}`
 
 progress : {t : Term} {tyT : Type} → t ∈ tyT → (IsValue t) ⊎ (Σ[ t' ∈ Term ] (t ↝ t'))
 progress d1 = {!!}
@@ -165,8 +167,9 @@ progress d1 = {!!}
 -- and may come in handy.
 
 preservation* : {t t' : Term} {tyT : Type} → (t ↝* t') → (t ∈ tyT) → (t' ∈ tyT)
-preservation* t↝*t' dt = {!!}
+preservation* et* dt = {!!}
 
+-- The following function can be applied to rules like e-If, e-Pred, ...
 map* : {f : Term → Term}
   → (f↝ : {t t' : Term} → t ↝ t' → f t ↝ f t')
   → {t t' : Term} → t ↝* t' → f t ↝* f t'
@@ -174,6 +177,7 @@ map* f↝ et* = {!!}
 
 step*_,_ : ∀ {t t' t''} → t ↝* t' → t' ↝* t'' → t ↝* t''
 step* et* , et*' = {!!}
+infixr 0 step*_,_
 
 --now prove normalization
 
