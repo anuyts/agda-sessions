@@ -31,12 +31,12 @@ open import Session1 hiding (_×_)
    For the project, we will use the Agda standard library.
 -}
 --Natural numbers and related tools.
-open import Data.Nat renaming (ℕ to Nat ; _≟_ to equalNat? ; _∸_ to _-_) hiding (pred ; _≤_ ; compare)
+open import Data.Nat renaming (ℕ to Nat ; _≟_ to equalNat? ; _∸_ to _-_) hiding (pred ; _≤_ ; compare; NonZero)
 --Propositional equality
 --  Write `open ≡-Reasoning` to get access to some tools for proving equality.
 open import Relation.Binary.PropositionalEquality
 --Booleans.
-open import Data.Bool renaming (not to ¬)
+open import Data.Bool renaming (not to ¬) hiding (_≤_)
 --The unit type (⊤).
 open import Data.Unit hiding (_≤_)
 --The disjoint union type _⊎_ .
