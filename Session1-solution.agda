@@ -252,10 +252,15 @@ split-conclusion : {A B C : Set} → (A → B × C) → (A → B) × (A → C)
 split-conclusion f = (λ a → fst (f a)) , (λ a → snd (f a))
 
 lemma : {A B : Set} → (A → B) → (A ⊎ ⊥ → B) × (⊥ → A)
-lemma f = (λ { (left a) → f a
-             ; (right ())
-             }
-          ) , (λ ())
+lemma f = (λ where
+               (left a) → f a
+               (right ())
+          ) , λ ()
+lemma' : {A B : Set} → (A → B) → (A ⊎ ⊥ → B) × (⊥ → A)
+lemma' f = (λ { (left a) → f a
+              ; (right ())
+              }
+           ) , (λ ())
 
 const : {A B : Set} → A → B → A
 const a b = a
@@ -286,7 +291,7 @@ refl₆ : ∀ A {a : A} → a ≡ a
 refl₆ A = refl
 
 refl₇ : ∀ A a → a ≡ a
-refl₇ A a = refl {A} -- If we explicitly pass the argument A, Agda figures that `a : A`.
+refl₇ A a = refl {A = A} -- If we explicitly pass the argument A, Agda figures that `a : A`.
 
 
 

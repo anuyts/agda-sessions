@@ -578,6 +578,15 @@ We can also define inline pattern matching functions. The syntax is:
     ; args-caseN → body-caseN
     }
 
+or
+
+  λ where
+      args-case1 → body-case1
+      absurd-args-case2
+      args-case3 → body-case3
+      ...
+      args-caseN → body-caseN
+
 Since the different arguments are separated just by spaces, a single argument
 consisting of a pattern should be placed in parentheses, e.g. `(left x)`.
 
@@ -709,21 +718,3 @@ infix   4 if_then_else_
 infixl 10 _+_
 infixl 12 _*_
 infix   2 _≡_
-
-
-
-
-
-
-{-
-When you load your file and code gets highlighted yellow, this indicates
-that Agda has failed to infer the value of an implicit argument.
-You can resolve this by passing the argument explicitly.
-This is done by writing it between accolads, e.g.
-`if_then_else_ {Bool} true false false`. If there are multiple implicit arguments,
-you can specify which one you are passing, e.g.
-`if_then_else_ {A = Bool} true false false`. Then Agda looks up `A` in the type of
-`if_then_else`. There is no mixfix syntax for explicitly passing implicit arguments.
-
-Fix the following definition of useless-function:
--}
