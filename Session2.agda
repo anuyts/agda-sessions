@@ -31,7 +31,7 @@ open import Session1 hiding (_×_)
    For the project, we will use the Agda standard library.
 -}
 --Natural numbers and related tools.
-open import Data.Nat renaming (ℕ to Nat ; _≟_ to equalNat? ; _∸_ to _-_) hiding (pred ; _≤_ ; compare; NonZero)
+open import Data.Nat renaming (ℕ to Nat ; _≟_ to equalNat? ; _∸_ to _-_) hiding (pred ; _≤_ ; compare)
 --Propositional equality
 --  Write `open ≡-Reasoning` to get access to some tools for proving equality.
 open import Relation.Binary.PropositionalEquality

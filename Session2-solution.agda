@@ -14,7 +14,7 @@
 open import Session1-solution
 -}
 
-open import Data.Nat renaming (ℕ to Nat ; _≟_ to equalNat? ; _∸_ to _-_) hiding (pred ; _≤_ ; compare; NonZero)
+open import Data.Nat renaming (ℕ to Nat ; _≟_ to equalNat? ; _∸_ to _-_) hiding (pred ; _≤_ ; compare)
 open import Relation.Binary.PropositionalEquality
 open import Data.Bool renaming (not to ¬) hiding (_≤_)
 open import Data.Unit hiding (_≤_)
