@@ -130,6 +130,15 @@ Part 4: The identity type
 data _≡_ {A : Set} : A → A → Set where
   refl : {x : A} → x ≡ x
 
+refl-example : 3 ≡ 3
+refl-example = refl
+
+--refl-counterexample : 3 ≡ 4
+--refl-counterexample = {!cannot be done!}
+
+refl-example' : 2 + 3 ≡ 5
+refl-example' = refl
+
 ¬¬true : ¬ (¬ true) ≡ true
 ¬¬true = refl
 
@@ -186,7 +195,7 @@ not-zero-and-one'' .1 () refl
 
 ∨-first : (b : Bool) → b ∨ false ≡ true → b ≡ true
 ∨-first true eq = refl
-∨-first false () 
+∨-first false ()
 
 easy-match : {x : Nat} → suc x ≡ 3 → x ≡ 2
 easy-match {.2} refl = refl
@@ -217,6 +226,19 @@ plus0-left n = refl
 plus0-right : (n : Nat) → n + 0 ≡ n
 plus0-right zero = refl
 plus0-right (suc n) = cong suc (plus0-right n)
+
+plus0-right-example : 3 + 0 ≡ 3
+plus0-right-example = plus0-right 3
+--Can you figure out how Agda computes the following term? (Use C-c C-n to view the computation result.)
+{- plus0-right 3
+ = cong suc (plus0-right 2)
+ = cong suc (cong suc (plus0-right 1))
+ = cong suc (cong suc (cong suc (plus0-right 0)))
+ = cong suc (cong suc (cong suc refl))
+ = cong suc (cong suc refl)
+ = cong suc refl
+ = refl
+-}
 
 plus-assoc : (k l m : Nat) → k + (l + m) ≡ (k + l) + m
 plus-assoc zero l m = refl
@@ -267,21 +289,21 @@ const a b = a
 ambiguous-function : Bool → ⊥ → Nat
 ambiguous-function bool bot =
   const {B = Bool} 5 (if bool then ⊥-elim bot else ⊥-elim bot)
-  
+
 if-zero : Nat → {A : Set} → A → A → A
 if-zero = λ {zero    {A} a b → a ;
              (suc n) {A} a b → b}
 
-refl₁ : {A : Set} → {a : A} → a ≡ a 
+refl₁ : {A : Set} → {a : A} → a ≡ a
 refl₁ = refl
 
-refl₂ : {A : Set} {a : A} → a ≡ a 
+refl₂ : {A : Set} {a : A} → a ≡ a
 refl₂ = refl
 
-refl₃ : (A : Set) → (a : A) → a ≡ a 
+refl₃ : (A : Set) → (a : A) → a ≡ a
 refl₃ A a = refl
 
-refl₄ : (A : Set) (a : A) → a ≡ a 
+refl₄ : (A : Set) (a : A) → a ≡ a
 refl₄ A a = refl
 
 refl₅ : ∀ {A} (a : A) → a ≡ a
@@ -295,7 +317,7 @@ refl₇ A a = refl {A = A} -- If we explicitly pass the argument A, Agda figures
 
 
 
-{- 
+{-
 Part 8: Decidable equality
 =========================
 -}
@@ -317,8 +339,8 @@ equalNat? : (m n : Nat) → Dec (m ≡ n)
 equalNat? zero zero = yes refl
 equalNat? zero (suc n) = no (λ ())
 equalNat? (suc m) zero = no (λ ())
--- 
-equalNat? (suc m) (suc n) with equalNat? m n 
+--
+equalNat? (suc m) (suc n) with equalNat? m n
 equalNat? (suc m) (suc n) | yes eq = yes (cong suc eq)
 equalNat? (suc m) (suc n) | no neq = no (λ suc-m=suc-n → neq (cong (λ k → k - 1) suc-m=suc-n))
   -- this last clause can be done in several ways, here are two alternatives:

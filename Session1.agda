@@ -14,7 +14,7 @@ proofs for you. Note that Agda is *not* an automatic prover, so you have to writ
 proofs yourself (though Agda can sometimes help you with that).
 
 These exercises contain instructions and explanations that will help you to solve
-them. These instructions are written in comments, either between {- -} or after -- 
+them. These instructions are written in comments, either between {- -} or after --
 and are ignored by Agda.
 
 The full documentation of Agda can be found at agda.readthedocs.io
@@ -55,15 +55,17 @@ symbol by simply writing \lnot. Here are some other unicode symbols we will use:
    \_1, \_2, ...   ₁, ₂, ₃, ...
    \equiv or \==   ≡
 
-The unicode input mode should be enabled by default in emacs, but you can enable 
-or disable the unicode input mode by pressing Ctrl-\. 
-
+When your in the middle of entering a unicode character (i.e. you've typed a backslash
+and a couple of characters) pres tab to see your options.
+The unicode input mode should be enabled by default in emacs, but you can enable
+or disable the unicode input mode by pressing Ctrl-\.
 If you see a unicode character and want to know how to type it, put the text cursor
 on it and select "Information about the character at point" in the "Agda" menu.
 
 The possibility to use any unicode character in an identifier, requires that all
 identifiers be separated by whitespace. E.g. since `¬x` is a single valid identifier,
 negation of x should be written `¬ x`.
+This is even true for characters such as `=` and `:` and `,`.
 
 Here is an incomplete definition of negation:
 -}
@@ -97,10 +99,15 @@ to confirm.
 Here is a list of some useful commands for interacting with Agda:
 
    C-c C-l         Load file
-   C-c C-d         (after load) Deduce (infer) type of term
-   C-c C-n         (after load) Normalize (evaluate) term
+                   Note: if you've changed code outside a hole since the last load,
+                   then the Agda interaction commands may be using outdated information.
+                   Reload often!
+
+   C-c C-d         Deduce (infer) type of term
+   C-c C-n         Normalize (evaluate) term
    C-c C-,         (inside hole) Information about hole (context and type of the hole)
                                  ^^ THIS ONE IS EXTREMELY USEFUL! Use it often!
+   C-c C-.         (inside hole) Same as C-c C-d and C-c C-, combined.
    C-c C-c         (inside hole) Case split
    C-c C-space     (inside hole) Give solution
    C-c C-r         (inside hole) Refine, using the goal's type and textual content
@@ -111,15 +118,12 @@ Here is a list of some useful commands for interacting with Agda:
 More commands can be found in the Agda menu of Emacs, and even more at
 https://agda.readthedocs.io/en/v2.6.0.1/tools/emacs-mode.html
 
-Note: if you've changed code outside a hole since the last load, then the Agda interaction
-commands may be using outdated information. Reload often!
-
 Now try to define 'and' and 'or' on booleans yourself by using case splitting.
 These functions have type Bool → Bool → Bool. The arrow (→) is right associative,
 so this should be read as Bool → (Bool → Bool), i.e. they are functions that take
 one boolean and return another function that takes another boolean and returns a boolean.
 
-The underscores in the names of a function mean that it uses mixfix syntax. 
+The underscores in the names of a function mean that it uses mixfix syntax.
 They indicate the positions where the arguments should go, i.e. `a ∧ b` desugars to `_∧_ a b`.
 
 Try to use as few cases as possible (i.e. two cases).
@@ -165,7 +169,7 @@ data Nat : Set where
   zero : Nat
   suc  : Nat → Nat
 
-{- 
+{-
 The following pragma allows you to write regular numbers 0,1,2,... instead of zero,
 suc zero, suc (suc zero), ...:
 -}
@@ -175,6 +179,10 @@ suc zero, suc (suc zero), ...:
 _+_ : Nat → Nat → Nat
 zero + n = n
 suc m + n = suc (m + n)
+{-
+The sum `3 + 2` will now compute as follows:
+3 + 2 = suc (2 + 2) = suc (suc (1 + 2)) = suc (suc (suc (0 + 2))) = suc (suc (suc 2))
+-}
 
 {- Now try to define the following functions yourself: -}
 is-zero : Nat → Bool
@@ -214,7 +222,7 @@ assistant. This means we can use Agda to formulate theorems and prove them,
 and Agda will check that the proofs are correct.
 
 Under the Curry-Howard correspondence, types correspond to propositions and
-terms of a type correspond to a proof of the corresponding proposition. So in Agda,
+terms of a type correspond to proofs of the corresponding proposition. So in Agda,
 we state a proposition by giving a type, and we prove it by writing a program
 of that type.
 Therefore, in order to be able to use Agda as a proof assistant, it is paramount
@@ -232,7 +240,9 @@ data ⊤ : Set where
 data ⊥ : Set where
   -- no constructors
 
--- Product type (unicode: \times or \x). This corresponds to the proposition "A and B".
+-- Product type (unicode: \times or \x).
+-- This is the type of pairs of an `x : A` and a `y : B`.
+-- This corresponds to the proposition "A and B".
 -- The first line of this definition says that, for all `A : Set` and `B : Set`, we have
 -- `A × B : Set`. These type parameters A and B are in scope in the constructors' types.
 data _×_ (A B : Set) : Set where
@@ -244,7 +254,9 @@ fst (x , y) = x
 snd : {A B : Set} → A × B → B
 snd p = {!!}
 
--- Coproduct type (unicode: \uplus). This corresponds to the proposition "A or B".
+-- Coproduct type (unicode: \uplus).
+-- Elements are either `left x` with `x : A` or `right y` with `y : B`.
+-- This corresponds to the proposition "A or B".
 data _⊎_ (A B : Set) : Set where
   left  : A → A ⊎ B
   right : B → A ⊎ B
@@ -252,7 +264,7 @@ data _⊎_ (A B : Set) : Set where
 {- Prove the following propositions by giving a term of the given type: -}
 
 -- "If A and B, then B and A"
--- hint: Agda is smart. After case 'splitting', try refining the goal using C-c C-r.
+-- hint: Agda is smart. After case splitting, try refining the goal using C-c C-r.
 ×-comm : {A B : Set} → A × B → B × A
 ×-comm p = {!!}
 
@@ -271,7 +283,7 @@ Part 3: Record types
 ====================
 So far, we have defined types by giving their constructors, i.e. by specifying how we
 can create elements of the type. We then used values of these types by case splitting
-(pattern matching) over they were constructed.
+(pattern matching) over how they were constructed.
 
 We can also do the converse, and define a type by specifying how we can use its elements,
 i.e. by specifying a list of fields that all elements must have. Then we can use values
@@ -320,7 +332,7 @@ property that we can think of as a type in Agda. In this exercise session, we gi
 only one example (albeit a very important one):
 
 Something we often want to prove is that two things are equal, for example we want to
-prove that ¬ (¬ true) is equal to true. For this purpose, we introduce the identity type
+prove that ¬ (¬ true) is equal to true. For this purpose, we introduce the type
 _≡_ (unicode input: \equiv or \==):
 -}
 
@@ -328,20 +340,46 @@ data _≡_ {A : Set} : A → A → Set where
   refl : {x : A} → x ≡ x
 
 {-
+This type is called identity type or (propositional) equality type.
+
 This is the first example we encounter of a dependent type: a type that depends
 on values. In particular, we have the type 'x ≡ y' that depends on the values of
-x and y. 
+x and y.
 
-The terms of type 'x ≡ y' can be interpreted as proofs that x equals y.
+The terms of type `x ≡ y` can be interpreted as proofs that x equals y.
+Thus, the type `x ≡ y` expresses that x and y are *provably* equal.
+This is called *propositional* equality.
 
-The only constructor of this type is refl (short for reflexivity). Note that refl
-only allows us to construct a term of type 'x ≡ x' for some x, so we can only
-prove that a term is equal to itself. We will later see how we can derive the
+The only constructor of this type is refl (short for reflexivity). Note that `refl`
+only allows us to construct a term of type `x ≡ x` for some x, so we can only use
+the constructor `refl` to prove `x ≡ y` if `x` and `y` are in fact the same:
+-}
+
+refl-example : 3 ≡ 3
+refl-example = {!!}
+
+refl-counterexample : 3 ≡ 4
+refl-counterexample = {!!}
+
+{-
+By "the same", here, we mean *definitionally/judgementally* equal, which means
+that Agda can recognize equality of `x` and `y` simply by unfolding all definitions.
+For example, the following works by definition of `_+_`:
+-}
+
+refl-example' : 2 + 3 ≡ 5
+refl-example' = {!!}
+
+{-
+In short: `refl` allows to prove that an equation holds definitionally if
+it holds propositionally.
+
+We will later see how we can derive the
 other properties of equality (such as symmetry and transitivity).
 -}
 
 {- (Side note for the curious)
-Observe how the *type parameter* {A : Set} is before the colon, whereas the indices* `A → A →` are behind it.
+Observe how the type *parameter* {A : Set} is before the colon, whereas the *indices* `A → A →` are behind it.
 So the first line says: for every {A : Set} (passed implicitly), we get a dependent type `_≡_ : A → A → Set`.
 The difference between putting variables before or after the colon is the following:
 * Type parameters are fixed (and in scope) throughout the definition: every constructor creates instances of the
@@ -387,7 +425,8 @@ You can also prove more general facts by adding arguments to a theorem, for exam
 ¬¬-elim : (b : Bool) → ¬ (¬ b) ≡ b
 {-
 To prove this lemma, you cannot use refl straight away because Agda will not compute
-¬ (¬ b) when b is a variable. Instead, you first have to do a case split on b (using C-c C-c)
+`¬ (¬ b)` when `b` is a variable. Indeed, we have only provided definitions for
+`¬ true` and `¬` false, so you first have to do a case split on b (using C-c C-c).
 -}
 ¬¬-elim b = {!!}
 
@@ -436,7 +475,8 @@ true-not-false : true ≡ false → ⊥
 true-not-false ()
 
 {-
-Absurd patterns also work for the empty type. Prove that a contradiction implies anything:
+Absurd patterns also work for the empty type. Prove that a contradiction implies anything.
+You can do this by pattern matching on `contradiction` (C-c C-c).
 -}
 ⊥-elim : {A : Set} → ⊥ → A
 ⊥-elim contradiction = {!!}
@@ -487,6 +527,7 @@ of identity proofs (UIP) and is by default provable in Agda:
 uip : {A : Set} {x y : A} {p q : x ≡ y} → p ≡ q
 uip {A}{x}{y}{p}{q} = {!!}
 {-
+TRIVIA:
 Homotopy Type Theory (HoTT), an active domain of research, investigates the virtues of
 not having UIP and instead viewing equality proofs as data. This is beyond the scope
 of the Formal Systems course.
@@ -524,6 +565,10 @@ hint 1: you can make a recursive call `plus0-right n` to get a proof of `n + 0 �
 hint 2: you may need to invoke the `cong` lemma from above to finish the proof.
 -}
 
+--Can you figure out how Agda computes the following term? (Use C-c C-n to view the computation result.)
+plus0-right-example : 3 + 0 ≡ 3
+plus0-right-example = plus0-right 3
+
 {-
 Prove that addition on natural numbers is associative. Try to use as few cases
 as possible. (It's possible to use only 2!)
@@ -549,8 +594,11 @@ However, we can also define nameless functions inline. The syntax is
 
   λ args → body
 
-You can input λ as \lambda or \Gl (Greek l). You can also use a backslash (\)
-instead of λ, input \\ for that.
+or
+
+  \ args → body
+
+You can input λ as \lambda or \Gl (Greek l), and \ as \\.
 
 Prove the following lemma:
 If (A or B) implies C, then A implies C and B implies C
@@ -641,18 +689,18 @@ Most importantly:
 1. If we introduce multiple NAMED variables at once, we may omit arrows between them.
    The arrow after the last named variable introduction, must stay.
 -}
--- both arguments implicit, with arrow
-refl₁ : {A : Set} → {a : A} → a ≡ a 
-refl₁ = refl
--- both arguments implicit, omit arrow in between (last arrow must stay)
-refl₂ : {A : Set} {a : A} → a ≡ a 
-refl₂ = refl
 -- both arguments explicit, with arrow
-refl₃ : (A : Set) → (a : A) → a ≡ a 
-refl₃ A a = refl
--- both arguments implicit, omit arrow in between (last arrow must stay)
-refl₄ : (A : Set) (a : A) → a ≡ a 
-refl₄ A a = refl
+refl₁ : (A : Set) → (a : A) → a ≡ a
+refl₁ A a = refl
+-- both arguments explicit, omit arrow in between (last arrow must stay)
+refl₂ : (A : Set) (a : A) → a ≡ a
+refl₂ A a = refl
+-- one argument explicit, with arrow
+refl₃ : {A : Set} → (a : A) → a ≡ a
+refl₃ a = refl
+-- one argument explicit, omit arrow in between (last arrow must stay)
+refl₄ : {A : Set} (a : A) → a ≡ a
+refl₄ a = refl
 {-
 2. We can omit the type signatures of named variables, provided that we put a
    ∀ (\forall) symbol in front of them.
@@ -670,16 +718,21 @@ refl₆ A = refl
 --refl₇ A a = refl
 
 
-{- 
+{-
 Part 8: Decidable equality
 =========================
 
-A type is decidable if we can either give a concrete element of that type 
+A type is decidable if we can either give a concrete element of that type
 (`yes`) or prove that there is definitely no such element (`no`).
 -}
 data Dec (A : Set) : Set where
   yes : A → Dec A
   no  : (A → ⊥) → Dec A
+{-
+Note that we could equivalently define `Dec A = A ⊎ (A → ⊥)`, but with
+the above definition we get to choose specialized constructor names instead
+of reusing `left` and `right`.
+-}
 
 {-
 A decision procedure for a property P is a function that returns a decision
@@ -699,8 +752,8 @@ equalNat? : (m n : Nat) → Dec (m ≡ n)
 equalNat? zero zero = {!!}
 equalNat? zero (suc n) = {!!}
 equalNat? (suc m) zero = {!!}
--- 
-equalNat? (suc m) (suc n) with equalNat? m n 
+--
+equalNat? (suc m) (suc n) with equalNat? m n
 equalNat? (suc m) (suc n) | yes eq = {!!}
 equalNat? (suc m) (suc n) | no neq = {!!}
 
