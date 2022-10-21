@@ -55,7 +55,7 @@ symbol by simply writing \lnot. Here are some other unicode symbols we will use:
    \_1, \_2, ...   ₁, ₂, ₃, ...
    \equiv or \==   ≡
 
-When your in the middle of entering a unicode character (i.e. you've typed a backslash
+When you're in the middle of entering a unicode character (i.e. you've typed a backslash
 and a couple of characters) pres tab to see your options.
 The unicode input mode should be enabled by default in emacs, but you can enable
 or disable the unicode input mode by pressing Ctrl-\.

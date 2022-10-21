@@ -268,21 +268,21 @@ insert n ((x :: xs) , (x≤xs , xs-sorted)) | right x≥n = x :: insert n (xs , 
 -- as below:
 -}
 
-insert' : (n : Nat) → (xs : List Nat) → IsSorted xs → List Nat
-insert' n [] []-sorted = n :: []
-insert' n (x :: xs) x::xs-sorted with compare n x
-insert' n (x :: xs) x::xs-sorted | left n≤x = n :: x :: xs
-insert' n (x :: xs) (x≤xs , xs-sorted) | right x≤n = x :: insert' n xs xs-sorted
+insert' : (n : Nat) → (xs : List Nat) → List Nat
+insert' n [] = n :: []
+insert' n (x :: xs) with compare n x
+insert' n (x :: xs) | left n≤x = n :: x :: xs
+insert' n (x :: xs) | right x≤n = x :: insert' n xs
 
 insert : (n : Nat) → (xs : SortedList) → List Nat
-insert n (xs , xs-sorted) = insert' n xs xs-sorted
+insert n (xs , xs-sorted) = insert' n xs
 
 insert-≤all : {m : Nat} → (n : Nat) → m ≤ n → (xs : SortedList) → m ≤all proj₁ xs → m ≤all insert n xs
 insert-≤all {m} n m≤n ([] , []-sorted) m≤[] = m≤n , tt
 insert-≤all {m} n m≤n ((x :: xs) , (x≤xs , xs-sorted)) m≤x::xs with compare n x
 insert-≤all {m} n m≤n ((x :: xs) , (x≤xs , xs-sorted)) m≤x::xs | left n≤x = m≤n , m≤x::xs
 insert-≤all {m} n m≤n ((x :: xs) , (x≤xs , xs-sorted)) (m≤x , m≤xs) | right x≤n =
-  m≤x , insert-≤all n (trans≤ m≤x x≤n) (xs , xs-sorted) m≤xs
+  m≤x , insert-≤all n m≤n (xs , xs-sorted) m≤xs
 
 {-
 insert-is-sorted : (n : Nat) → (xs : SortedList) → IsSorted (insert n xs)
