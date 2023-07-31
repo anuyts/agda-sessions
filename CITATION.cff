@@ -1,0 +1,23 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: agda-sessions
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Jesper
+    family-names: Cockx
+    orcid: 'https://orcid.org/0000-0003-3862-4073'
+  - given-names: Andreas
+    family-names: Nuyts
+    orcid: 'https://orcid.org/0000-0002-1571-5063'
+  - given-names: Thomas
+    family-names: Van Strydonck
+repository-code: 'https://github.com/anuyts/agda-sessions'
+abstract: Learn the Agda basics in three 2-hour sessions.
+keywords:
+  - Agda
+  - tutorial
