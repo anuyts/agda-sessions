@@ -16,6 +16,7 @@ authors:
     orcid: 'https://orcid.org/0000-0002-1571-5063'
   - given-names: Thomas
     family-names: Van Strydonck
+    orcid: 'https://orcid.org/0000-0002-5262-1381'
 repository-code: 'https://github.com/anuyts/agda-sessions'
 abstract: Learn the Agda basics in three 2-hour sessions.
 keywords:
