@@ -31,7 +31,7 @@ open import Session1 hiding (_×_)
    For the project, we will use the Agda standard library.
 -}
 --Natural numbers and related tools.
-open import Data.Nat renaming (ℕ to Nat ; _≟_ to equalNat? ; _∸_ to _-_) hiding (pred ; _≤_ ; compare)
+open import Data.Nat renaming (ℕ to Nat ; _≟_ to equalNat? ; _∸_ to _-_) hiding (pred ; _≤_ ; compare {- ; NonZero -})
 --Propositional equality
 --  Write `open ≡-Reasoning` to get access to some tools for proving equality.
 open import Relation.Binary.PropositionalEquality
@@ -359,10 +359,6 @@ IsSorted (x :: xs) = (x ≤all xs) × IsSorted xs
    LOT easier if we include these superfluous inequalities.
 -}
 
--- In analogy to the NonZero type, we define a type of sorted lists:
-SortedList : Set
-SortedList = Σ[ xs ∈ List Nat ] (IsSorted xs)
-
 -- We need to be able to decide which of two numbers is greater.
 -- This could be done by implementing a term of type (m n : Nat) → Dec (m ≤ n),
 -- but the following will be more practical:
@@ -371,34 +367,44 @@ compare : (m n : Nat) → (m ≤ n) ⊎ (n ≤ m)
 compare m n = {!!}
 
 -- Define a function that inserts a number into a sorted list.
---    Hint: you will likely need a with-clause.
-insert : (n : Nat) → (xs : SortedList) → List Nat
-insert n xs = {!!}
+--    Hint: You will likely need a with-clause.
+
+insert : (n : Nat) → (xs : List Nat) → IsSorted xs → List Nat
+insert n xs xs-sorted = {!!}
 
 -- Show that if `m ≤ n` and `m` ≤ all elements of `xs`, then `m` ≤ all elements of
 -- `insert n xs`.
 insert-≤all : {m : Nat} → (n : Nat) → m ≤ n
-  → (xs : SortedList) → m ≤all proj₁ xs → m ≤all insert n xs
-insert-≤all {m} n m≤n (xs , xs-sorted) m≤xs = {!!}
+  → (xs : List Nat) → (xs-sorted : IsSorted xs) → m ≤all xs → m ≤all insert n xs xs-sorted
+insert-≤all {m} n m≤n xs xs-sorted m≤xs = {!!}
 {- Note: The proposition that you need to prove, contains a call to `insert`.
    It is then often a good idea to start with the same pattern matches and with-abstractions
    that you used in the definition of `insert`, so that the call properly reduces
    in each of the cases.
    When displaying the type, Agda will even append the content of the with-clause
    of `insert`, i.e.
-      `m ≤all (insert n ((x :: xs) , (x≤xs , xs-sorted)))`
+      `m ≤all (insert n (x :: xs) (x≤xs , xs-sorted))`
    will become
-      `m ≤all (insert n ((x :: xs) , (x≤xs , xs-sorted)) | compare n x)`
+      `m ≤all (insert n (x :: xs) (x≤xs , xs-sorted) | compare n x)`
    or similar (depending on your exact definition of `insert`).
 -}
 
 -- Show that `insert` preserves sortedness:
-insert-is-sorted : (n : Nat) → (xs : SortedList) → IsSorted (insert n xs)
-insert-is-sorted n (xs , xs-sorted) = {!!}
+insert-is-sorted : (n : Nat) → (xs : List Nat) → (xs-sorted : IsSorted xs) → IsSorted (insert n xs xs-sorted)
+insert-is-sorted n xs xs-sorted = {!!}
 
--- Pairing them up:
+-- In analogy to the NonZero type, we define a type of sorted lists:
+SortedList : Set
+SortedList = Σ[ xs ∈ List Nat ] (IsSorted xs)
+
+-- We can then wrap up the previous results:
 insert-sorted : Nat → SortedList → SortedList
-insert-sorted n xs = insert n xs , insert-is-sorted n xs
+insert-sorted n xss = {!!}
+{- Note: In the previous results (`insert`, `insert-is-sorted`), we could have directly uncurried
+   the arguments `xs` and `xs-sorted` to a single `SortedList`.
+   However, then we have functions defined by recursion, not on an argument, but on a component of an argument.
+   These will not pass the termination checker in some versions of Agda.
+-}
 
 -- Implement a `sort` function:
 sort : List Nat → SortedList
@@ -421,7 +427,7 @@ A frequently asked question is: how can one use an equality proof.
 
 The answer is: by pattern matching. Pattern matching over an equality proof p : a ≡ b is only possible if a and b
 
- * are obviously different (then you get an absurd pattern),
+ * are obviously unequal (then you get an absurd pattern),
  * easy to equate.
 
 If the equation is not easily solved, then you can turn one of its sides into a variable by with-abstracting over it.
@@ -431,7 +437,7 @@ https://agda.readthedocs.io/en/v2.5.3/language/with-abstraction.html#simultaneou
 
 We will consider an example here as well. Suppose we know:
   x + y = x * x
-Then clearly, if `x + y` is even, then so is `x + x`. Let's prove this:
+Then clearly, if `x * x` is even, then so is `x + y`. Let's prove this:
 -}
 example : {x y : Nat} → x + y ≡ x * x → IsEven (x * x) → IsEven (x + y)
 example {x} {y} p x*x-is-even = {!!}
