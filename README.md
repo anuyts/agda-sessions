@@ -1,4 +1,6 @@
 # Agda-sessions
+[![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC_BY--NC_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
+
 Learn the Agda basics in three 2-hour sessions.
 
 This Agda tutorial was constructed by Jesper Cockx and later modified and maintained by Andreas Nuyts as part of a CS master course titled "Formal Systems and their Applications" at KU Leuven, Belgium. We decided to make it public after receiving comments that there aren't so many quick Agda tutorials out there.
